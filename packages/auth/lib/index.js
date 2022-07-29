@@ -40,6 +40,7 @@ import AppleAuthProvider from './providers/AppleAuthProvider';
 import Settings from './Settings';
 import User from './User';
 import version from './version';
+import ConfirmationResultMFASignIn from './ConfirmationResultMFASignIn';
 
 const statics = {
   AppleAuthProvider,
@@ -274,6 +275,12 @@ class FirebaseAuthModule extends FirebaseModule {
       .then(userCredential => this._setUserCredential(userCredential));
   }
 
+  signInWithMultiFactorInfo(hint) {
+    return this.native
+      .signInWithMultiFactorInfo(hint.UID)
+      .then(result => new ConfirmationResultMFASignIn(this, result.verificationId));
+  }
+
   sendPasswordResetEmail(email, actionCodeSettings = null) {
     return this.native.sendPasswordResetEmail(email, actionCodeSettings);
   }
@@ -360,28 +367,25 @@ class FirebaseAuthModule extends FirebaseModule {
     }
 
     let _url = url;
-    const androidBypassEmulatorUrlRemap =
-      typeof this.firebaseJson.android_bypass_emulator_url_remap === 'boolean' &&
-      this.firebaseJson.android_bypass_emulator_url_remap;
-    if (!androidBypassEmulatorUrlRemap && isAndroid && _url) {
+    if (isAndroid && _url) {
       if (_url.startsWith('http://localhost')) {
         _url = _url.replace('http://localhost', 'http://10.0.2.2');
         // eslint-disable-next-line no-console
         console.log(
-          'Mapping auth host "localhost" to "10.0.2.2" for android emulators. Use real IP on real devices. You can bypass this behaviour with "android_bypass_emulator_url_remap" flag.',
+          'Mapping auth host "localhost" to "10.0.2.2" for android emulators. Use real IP on real devices.',
         );
       }
       if (_url.startsWith('http://127.0.0.1')) {
         _url = _url.replace('http://127.0.0.1', 'http://10.0.2.2');
         // eslint-disable-next-line no-console
         console.log(
-          'Mapping auth host "127.0.0.1" to "10.0.2.2" for android emulators. Use real IP on real devices. You can bypass this behaviour with "android_bypass_emulator_url_remap" flag.',
+          'Mapping auth host "127.0.0.1" to "10.0.2.2" for android emulators. Use real IP on real devices.',
         );
       }
     }
 
     // Native calls take the host and port split out
-    const hostPortRegex = /^http:\/\/([\w\d-.]+):(\d+)$/;
+    const hostPortRegex = /^http:\/\/([\w\d.]+):(\d+)$/;
     const urlMatches = _url.match(hostPortRegex);
     if (!urlMatches) {
       throw new Error('firebase.auth().useEmulator() unable to parse host and port from URL');

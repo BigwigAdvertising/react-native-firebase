@@ -15,101 +15,140 @@
  *
  */
 
-import { isObject, isString, isUndefined, isBoolean } from '@react-native-firebase/app/lib/common';
+import {
+  isObject,
+  isString,
+  isUndefined,
+  isBoolean
+} from '@react-native-firebase/app/lib/common'
+import ConfirmationResultMFAEnroll from './ConfirmationResultMFAEnroll'
 
 export default class User {
   constructor(auth, user) {
-    this._auth = auth;
-    this._user = user;
+    this._auth = auth
+    this._user = user
   }
 
   get displayName() {
-    return this._user.displayName || null;
+    return this._user.displayName || null
   }
 
   get email() {
-    return this._user.email || null;
+    return this._user.email || null
   }
 
   get emailVerified() {
-    return this._user.emailVerified || false;
+    return this._user.emailVerified || false
   }
 
   get isAnonymous() {
-    return this._user.isAnonymous || false;
+    return this._user.isAnonymous || false
   }
 
   get metadata() {
-    const { metadata } = this._user;
+    const { metadata } = this._user
 
     return {
       lastSignInTime: new Date(metadata.lastSignInTime).toISOString(),
-      creationTime: new Date(metadata.creationTime).toISOString(),
-    };
+      creationTime: new Date(metadata.creationTime).toISOString()
+    }
   }
 
   get phoneNumber() {
-    return this._user.phoneNumber || null;
+    return this._user.phoneNumber || null
   }
 
   get tenantId() {
-    return this._user.tenantId || null;
+    return this._user.tenantId || null
   }
 
   get photoURL() {
-    return this._user.photoURL || null;
+    return this._user.photoURL || null
   }
 
   get providerData() {
-    return this._user.providerData;
+    return this._user.providerData
   }
 
   get providerId() {
-    return this._user.providerId;
+    return this._user.providerId
   }
 
   get uid() {
-    return this._user.uid;
+    return this._user.uid
+  }
+
+  get multiFactor() {
+    return {
+      enroll: (phoneNumber, verificationCode, displayName = '') => {
+        return this._auth.native
+          .multiFactorEnrollWithPhone(phoneNumber)
+          .then(
+            async result => {
+              const multiFactorEnrollment = new ConfirmationResultMFAEnroll(
+                this._auth,
+                result.verificationId,
+                displayName
+              )
+              return await multiFactorEnrollment.confirm(verificationCode)
+            }
+          )
+      },
+      unenroll: hint => {
+        return this._auth.native.multiFactorUnenroll(hint.UID).then(user => {
+          this._auth._setUser(user)
+        })
+      },
+      enrolledFactors: this._user.multiFactorEnrolledFactors
+    }
   }
 
   delete() {
     return this._auth.native.delete().then(() => {
-      this._auth._setUser();
-    });
+      this._auth._setUser()
+    })
   }
 
   getIdToken(forceRefresh = false) {
-    return this._auth.native.getIdToken(forceRefresh);
+    return this._auth.native.getIdToken(forceRefresh)
   }
 
   getIdTokenResult(forceRefresh = false) {
-    return this._auth.native.getIdTokenResult(forceRefresh);
+    return this._auth.native.getIdTokenResult(forceRefresh)
   }
 
   linkWithCredential(credential) {
     return this._auth.native
-      .linkWithCredential(credential.providerId, credential.token, credential.secret)
-      .then(userCredential => this._auth._setUserCredential(userCredential));
+      .linkWithCredential(
+        credential.providerId,
+        credential.token,
+        credential.secret
+      )
+      .then(userCredential => this._auth._setUserCredential(userCredential))
   }
 
   reauthenticateWithCredential(credential) {
     return this._auth.native
-      .reauthenticateWithCredential(credential.providerId, credential.token, credential.secret)
-      .then(userCredential => this._auth._setUserCredential(userCredential));
+      .reauthenticateWithCredential(
+        credential.providerId,
+        credential.token,
+        credential.secret
+      )
+      .then(userCredential => this._auth._setUserCredential(userCredential))
   }
 
   reload() {
     return this._auth.native.reload().then(user => {
-      this._auth._setUser(user);
-    });
+      this._auth._setUser(user)
+    })
   }
 
   sendEmailVerification(actionCodeSettings) {
     if (isObject(actionCodeSettings)) {
       if (!isString(actionCodeSettings.url)) {
         throw new Error(
-          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.url' expected a string value.",
-        );
+          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.url' expected a string value."
+        )
       }
 
       if (
@@ -117,8 +156,8 @@ export default class User {
         !isString(actionCodeSettings.dynamicLinkDomain)
       ) {
         throw new Error(
-          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.dynamicLinkDomain' expected a string value.",
-        );
+          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.dynamicLinkDomain' expected a string value."
+        )
       }
 
       if (
@@ -126,33 +165,33 @@ export default class User {
         !isBoolean(actionCodeSettings.handleCodeInApp)
       ) {
         throw new Error(
-          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.handleCodeInApp' expected a boolean value.",
-        );
+          "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.handleCodeInApp' expected a boolean value."
+        )
       }
 
       if (!isUndefined(actionCodeSettings.iOS)) {
         if (!isObject(actionCodeSettings.iOS)) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.iOS' expected an object value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.iOS' expected an object value."
+          )
         }
         if (!isString(actionCodeSettings.iOS.bundleId)) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.iOS.bundleId' expected a string value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.iOS.bundleId' expected a string value."
+          )
         }
       }
 
       if (!isUndefined(actionCodeSettings.android)) {
         if (!isObject(actionCodeSettings.android)) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android' expected an object value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android' expected an object value."
+          )
         }
         if (!isString(actionCodeSettings.android.packageName)) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.packageName' expected a string value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.packageName' expected a string value."
+          )
         }
 
         if (
@@ -160,8 +199,8 @@ export default class User {
           !isBoolean(actionCodeSettings.android.installApp)
         ) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.installApp' expected a boolean value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.installApp' expected a boolean value."
+          )
         }
 
         if (
@@ -169,63 +208,71 @@ export default class User {
           !isString(actionCodeSettings.android.minimumVersion)
         ) {
           throw new Error(
-            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.minimumVersion' expected a string value.",
-          );
+            "firebase.auth.User.sendEmailVerification(*) 'actionCodeSettings.android.minimumVersion' expected a string value."
+          )
         }
       }
     }
 
-    return this._auth.native.sendEmailVerification(actionCodeSettings).then(user => {
-      this._auth._setUser(user);
-    });
+    return this._auth.native
+      .sendEmailVerification(actionCodeSettings)
+      .then(user => {
+        this._auth._setUser(user)
+      })
   }
 
   toJSON() {
-    return Object.assign({}, this._user);
+    return Object.assign({}, this._user)
   }
 
   unlink(providerId) {
-    return this._auth.native.unlink(providerId).then(user => this._auth._setUser(user));
+    return this._auth.native
+      .unlink(providerId)
+      .then(user => this._auth._setUser(user))
   }
 
   updateEmail(email) {
     return this._auth.native.updateEmail(email).then(user => {
-      this._auth._setUser(user);
-    });
+      this._auth._setUser(user)
+    })
   }
 
   updatePassword(password) {
     return this._auth.native.updatePassword(password).then(user => {
-      this._auth._setUser(user);
-    });
+      this._auth._setUser(user)
+    })
   }
 
   updatePhoneNumber(credential) {
     return this._auth.native
-      .updatePhoneNumber(credential.providerId, credential.token, credential.secret)
+      .updatePhoneNumber(
+        credential.providerId,
+        credential.token,
+        credential.secret
+      )
       .then(user => {
-        this._auth._setUser(user);
-      });
+        this._auth._setUser(user)
+      })
   }
 
   updateProfile(updates) {
     return this._auth.native.updateProfile(updates).then(user => {
-      this._auth._setUser(user);
-    });
+      this._auth._setUser(user)
+    })
   }
 
   verifyBeforeUpdateEmail(newEmail, actionCodeSettings) {
     if (!isString(newEmail)) {
       throw new Error(
-        "firebase.auth.User.verifyBeforeUpdateEmail(*) 'newEmail' expected a string value.",
-      );
+        "firebase.auth.User.verifyBeforeUpdateEmail(*) 'newEmail' expected a string value."
+      )
     }
 
     if (isObject(actionCodeSettings)) {
       if (!isString(actionCodeSettings.url)) {
         throw new Error(
-          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.url' expected a string value.",
-        );
+          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.url' expected a string value."
+        )
       }
 
       if (
@@ -233,8 +280,8 @@ export default class User {
         !isString(actionCodeSettings.dynamicLinkDomain)
       ) {
         throw new Error(
-          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.dynamicLinkDomain' expected a string value.",
-        );
+          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.dynamicLinkDomain' expected a string value."
+        )
       }
 
       if (
@@ -242,33 +289,33 @@ export default class User {
         !isBoolean(actionCodeSettings.handleCodeInApp)
       ) {
         throw new Error(
-          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.handleCodeInApp' expected a boolean value.",
-        );
+          "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.handleCodeInApp' expected a boolean value."
+        )
       }
 
       if (!isUndefined(actionCodeSettings.iOS)) {
         if (!isObject(actionCodeSettings.iOS)) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.iOS' expected an object value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.iOS' expected an object value."
+          )
         }
         if (!isString(actionCodeSettings.iOS.bundleId)) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.iOS.bundleId' expected a string value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.iOS.bundleId' expected a string value."
+          )
         }
       }
 
       if (!isUndefined(actionCodeSettings.android)) {
         if (!isObject(actionCodeSettings.android)) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android' expected an object value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android' expected an object value."
+          )
         }
         if (!isString(actionCodeSettings.android.packageName)) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.packageName' expected a string value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.packageName' expected a string value."
+          )
         }
 
         if (
@@ -276,8 +323,8 @@ export default class User {
           !isBoolean(actionCodeSettings.android.installApp)
         ) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.installApp' expected a boolean value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.installApp' expected a boolean value."
+          )
         }
 
         if (
@@ -285,15 +332,17 @@ export default class User {
           !isString(actionCodeSettings.android.minimumVersion)
         ) {
           throw new Error(
-            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.minimumVersion' expected a string value.",
-          );
+            "firebase.auth.User.verifyBeforeUpdateEmail(_, *) 'actionCodeSettings.android.minimumVersion' expected a string value."
+          )
         }
       }
     }
 
-    return this._auth.native.verifyBeforeUpdateEmail(newEmail, actionCodeSettings).then(user => {
-      this._auth._setUser(user);
-    });
+    return this._auth.native
+      .verifyBeforeUpdateEmail(newEmail, actionCodeSettings)
+      .then(user => {
+        this._auth._setUser(user)
+      })
   }
 
   /**
@@ -302,41 +351,43 @@ export default class User {
 
   linkWithPhoneNumber() {
     throw new Error(
-      'firebase.auth.User.linkWithPhoneNumber() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.linkWithPhoneNumber() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   linkWithPopup() {
     throw new Error(
-      'firebase.auth.User.linkWithPopup() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.linkWithPopup() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   linkWithRedirect() {
     throw new Error(
-      'firebase.auth.User.linkWithRedirect() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.linkWithRedirect() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   reauthenticateWithPhoneNumber() {
     throw new Error(
-      'firebase.auth.User.reauthenticateWithPhoneNumber() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.reauthenticateWithPhoneNumber() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   reauthenticateWithPopup() {
     throw new Error(
-      'firebase.auth.User.reauthenticateWithPopup() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.reauthenticateWithPopup() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   reauthenticateWithRedirect() {
     throw new Error(
-      'firebase.auth.User.reauthenticateWithRedirect() is unsupported by the native Firebase SDKs.',
-    );
+      'firebase.auth.User.reauthenticateWithRedirect() is unsupported by the native Firebase SDKs.'
+    )
   }
 
   get refreshToken() {
-    throw new Error('firebase.auth.User.refreshToken is unsupported by the native Firebase SDKs.');
+    throw new Error(
+      'firebase.auth.User.refreshToken is unsupported by the native Firebase SDKs.'
+    )
   }
 }

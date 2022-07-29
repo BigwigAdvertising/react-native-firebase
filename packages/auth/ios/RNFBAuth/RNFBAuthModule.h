@@ -15,15 +15,15 @@
  *
  */
 
-#import <Firebase/Firebase.h>
 #import <Foundation/Foundation.h>
 #import <React/RCTBridgeModule.h>
+#import <Firebase/Firebase.h>
 
 @interface RNFBAuthModule : NSObject <RCTBridgeModule>
 @end
 
-extern NSString* const AuthErrorCode_toJSErrorCode[];
-NSString* const AuthErrorCode_toJSErrorCode[] = {
+extern NSString * const AuthErrorCode_toJSErrorCode[];
+NSString * const AuthErrorCode_toJSErrorCode[] = {
     [FIRAuthErrorCodeInvalidCustomToken] = @"invalid-custom-token",
     [FIRAuthErrorCodeCustomTokenMismatch] = @"custom-token-mismatch",
     [FIRAuthErrorCodeInvalidCredential] = @"invalid-credential",
@@ -34,8 +34,7 @@ NSString* const AuthErrorCode_toJSErrorCode[] = {
     [FIRAuthErrorCodeWrongPassword] = @"wrong-password",
     [FIRAuthErrorCodeTooManyRequests] = @"too-many-requests",
     [FIRAuthErrorCodeUserNotFound] = @"user-not-found",
-    [FIRAuthErrorCodeAccountExistsWithDifferentCredential] =
-        @"account-exists-with-different-credential",
+    [FIRAuthErrorCodeAccountExistsWithDifferentCredential] = @"account-exists-with-different-credential",
     [FIRAuthErrorCodeRequiresRecentLogin] = @"requires-recent-login",
     [FIRAuthErrorCodeProviderAlreadyLinked] = @"provider-already-linked",
     [FIRAuthErrorCodeNoSuchProvider] = @"no-such-provider",
@@ -74,12 +73,20 @@ NSString* const AuthErrorCode_toJSErrorCode[] = {
     [FIRAuthErrorCodeCaptchaCheckFailed] = @"captcha-check-failed",
     [FIRAuthErrorCodeWebContextAlreadyPresented] = @"cancelled-popup-request",
     [FIRAuthErrorCodeWebContextCancelled] = @"popup-closed-by-user",
-    [FIRAuthErrorCodeAppVerificationUserInteractionFailure] =
-        @"app-verification-user-interaction-failure",
+    [FIRAuthErrorCodeAppVerificationUserInteractionFailure] = @"app-verification-user-interaction-failure",
     [FIRAuthErrorCodeInvalidClientID] = @"invalid-oauth-client-id",
     [FIRAuthErrorCodeWebNetworkRequestFailed] = @"network-request-failed",
     [FIRAuthErrorCodeWebInternalError] = @"internal-error",
     [FIRAuthErrorCodeNullUser] = @"null-user",
     [FIRAuthErrorCodeKeychainError] = @"keychain-error",
     [FIRAuthErrorCodeInternalError] = @"internal-error",
-    [FIRAuthErrorCodeMalformedJWT] = @"malformed-jwt"};
+    [FIRAuthErrorCodeMalformedJWT] = @"malformed-jwt",
+    [FIRAuthErrorCodeSecondFactorRequired] = @"multi-factor-auth-required",
+    [FIRAuthErrorCodeMissingMultiFactorSession] = @"missing-multi-factor-session",
+    [FIRAuthErrorCodeMissingMultiFactorInfo] = @"missing-multi-factor-info",
+    [FIRAuthErrorCodeInvalidMultiFactorSession] = @"invalid-multi-factor-session",
+    [FIRAuthErrorCodeMultiFactorInfoNotFound] = @"multi-factor-info-not-found",
+    [FIRAuthErrorCodeSecondFactorAlreadyEnrolled] = @"second-factor-already-in-use",
+    [FIRAuthErrorCodeMaximumSecondFactorCountExceeded] = @"maximum-second-factor-count-exceeded",
+    [FIRAuthErrorCodeUnsupportedFirstFactor] = @"unsupported-first-factor",
+};
